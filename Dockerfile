@@ -1,8 +1,8 @@
 FROM python:3.9-slim
 
-# Install FFmpeg (Essential for audio conversion)
+# Install FFmpeg AND Git (Git is required to download the latest yt-dlp)
 RUN apt-get update && \
-    apt-get install -y ffmpeg && \
+    apt-get install -y ffmpeg git && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
