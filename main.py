@@ -4,17 +4,16 @@ import os
 
 app = Flask(__name__)
 
-# --- 🎨 DARK UI ---
+# --- 🎨 MODERN DARK UI ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonicStream | Cloud API</title>
+    <title>SonicStream | Cloud</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root { --bg: #0f0f0f; --card: #1c1c1c; --accent: #00e5ff; --text: #ffffff; --input: #252525; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,8 +48,8 @@ HTML_PAGE = """
 </head>
 <body>
     <div class="container">
-        <div id="loader"><div class="spinner"></div><h3>Remote Processing...</h3></div>
-
+        <div id="loader"><div class="spinner"></div><h3>Connecting to Cloud...</h3></div>
+        
         <div class="header">
             <h1>Sonic<span>Stream</span></h1>
             <p style="color:#888; font-size:14px; margin-bottom:30px;">Cloud API Mode</p>
@@ -67,7 +66,7 @@ HTML_PAGE = """
                 <label>Format</label>
                 <select name="format">
                     <option value="mp3">MP3 (Universal)</option>
-                    <option value="best">Best Audio (AAC/M4A)</option>
+                    <option value="best">Best Audio (Original Source)</option>
                     <option value="flac">FLAC (Lossless)</option>
                     <option value="wav">WAV (Uncompressed)</option>
                     <option value="ogg">OGG (Vorbis)</option>
@@ -91,50 +90,44 @@ def convert():
     url = request.form.get('url')
     fmt = request.form.get('format')
     
-    # 🚀 API SWITCH: Using a public Cobalt instance (like Apisyu backend)
-    # This server does NOT download the file. It asks the API to do it.
-    api_url = "https://co.wuk.sh/api/json" 
+    # 🚀 USING PUBLIC COBALT API (Wuk.sh instance)
+    # This solves the IP Ban and the Crash issues.
+    api_url = "https://co.wuk.sh/api/json"
     
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
 
-    # Map our format selection to API parameters
-    is_audio = True
-    audio_format = fmt
-    
-    if fmt == 'best':
-        audio_format = None # Auto-detect best
+    # Handle "best" format logic
+    audio_format = fmt if fmt != 'best' else None
 
     payload = {
         "url": url,
-        "isAudioOnly": is_audio,
+        "isAudioOnly": True,
         "aFormat": audio_format,
         "isNoTTWatermark": True
     }
 
     try:
-        # Send request to the remote API
         response = requests.post(api_url, json=payload, headers=headers)
         data = response.json()
 
         if response.status_code == 200 and 'url' in data:
-            # ✅ SUCCESS: We got a download link!
-            # Redirect the user directly to the file download
+            # Redirect user to the file download directly
             return redirect(data['url'])
         
         elif 'text' in data:
             raise Exception(data['text'])
         else:
-            raise Exception("API returned an unknown error.")
+            raise Exception("Remote API Error")
 
     except Exception as e:
         return f"""
         <body style="background:#0f0f0f; color:#fff; font-family:sans-serif; text-align:center; padding:50px;">
             <h2 style="color:#ff0033;">API Error</h2>
             <p>{str(e)}</p>
-            <p style="color:#888;">The remote server could not process this video. Try a different link.</p>
+            <p style="color:#888;">The remote server could not handle this link.</p>
             <button onclick="history.back()" style="padding:10px 20px;">Go Back</button>
         </body>
         """
