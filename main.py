@@ -249,14 +249,8 @@ def convert():
         'quiet': True,
         **cookie_args, # Inject cookies if file exists
         
-        # 👇 THE 2026 FIX: Force "Android Music" Client 👇
-        # This is the secret weapon to bypass the "Sign in" web error
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['android_music', 'android_creator'],
-                'player_skip': ['web', 'ios', 'tv', 'android']
-            }
-        },
+        # 👇 NEW FIX: Set Desktop User-Agent to match your exported cookies 👇
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         
         'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'wav'}],
     }
