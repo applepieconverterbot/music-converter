@@ -4,7 +4,7 @@ import random
 
 app = Flask(__name__)
 
-# --- 🎨 RED DARK UI (No Changes) ---
+# --- 🎨 RED DARK UI (Preserved) ---
 HTML_PAGE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -92,22 +92,27 @@ def convert():
     url = request.form.get('url')
     fmt = request.form.get('format')
     
-    # 🚀 HUGE SERVER LIST
-    # We rotate through many different providers to find one that isn't blocked.
+    # 🚀 MASSIVE SERVER LIST (15+ Mirrors)
+    # This increases the chance of bypassing the Render IP block
     api_servers = [
         "https://api.cobalt.tools/api/json",      # Official
         "https://cobalt.pog.com.hr/api/json",     # Reliable
+        "https://api.wuk.sh/api/json",            # Popular
         "https://api.server.garden/api/json",     # Good uptime
         "https://cobalt.timelessroses.ca/api/json", 
         "https://cobalt.q1.pm/api/json",
-        "https://api.wuk.sh/api/json",            # Often busy but good
-        "https://cobalt.synbay.app/api/json"
+        "https://cobalt.synbay.app/api/json",
+        "https://dl.khub.ky/api/json",
+        "https://cobalt.raycast.com/api/json",    # Fast
+        "https://cobalt.kwiatekmiki.com/api/json",
+        "https://cobalt.mashed.jp/api/json",
+        "https://cobalt.cafe/api/json",
+        "https://api.cobalt.kyrie25.me/api/json",
+        "https://cobalt.6769.club/api/json",
+        "https://cobalt.xy24.eu.org/api/json"
     ]
     random.shuffle(api_servers)
 
-    # 🛑 SIMPLIFIED HEADERS
-    # Removed "Origin" and "Referer" to prevent cross-site security blocks.
-    # Just acting like a raw browser now.
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -131,8 +136,8 @@ def convert():
     for api_url in api_servers:
         try:
             print(f"Attempting server: {api_url}")
-            # Reduced timeout to 10s to failover faster
-            response = requests.post(api_url, json=payload, headers=headers, timeout=10)
+            # Short timeout (8s) to skip dead servers quickly
+            response = requests.post(api_url, json=payload, headers=headers, timeout=8)
             
             try:
                 data = response.json()
@@ -144,17 +149,17 @@ def convert():
             
             elif 'text' in data:
                 last_error = data['text']
+                # If invalid link, stop trying (user fault)
                 if "invalid" in last_error.lower(): break 
             
         except Exception as e:
-            # Server is dead or blocking Render, try next
             last_error = f"Connection failed to {api_url}"
             continue
 
     return f"""
     <body style="background:#0f0f0f; color:#fff; font-family:sans-serif; text-align:center; padding:50px;">
         <h2 style="color:#ff0033;">API Error</h2>
-        <p>We tried {len(api_servers)} servers, but they are all busy or blocking the connection.</p>
+        <p>We tried {len(api_servers)} servers, but they are all blocked or busy.</p>
         <p style="color:#888; font-size:12px;">Last error: {last_error}</p>
         <button onclick="history.back()" style="padding:10px 20px; background:#333; color:white; border:none; cursor:pointer;">Go Back</button>
     </body>
