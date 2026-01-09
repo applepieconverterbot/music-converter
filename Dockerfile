@@ -1,6 +1,7 @@
-FROM python:3.9-slim
+# 👇 CHANGED: Upgraded from 3.9 to 3.11 for yt-dlp compatibility
+FROM python:3.11-slim
 
-# Install FFmpeg AND Git (Git is required to download the latest yt-dlp)
+# Install FFmpeg AND Git
 RUN apt-get update && \
     apt-get install -y ffmpeg git && \
     rm -rf /var/lib/apt/lists/*
